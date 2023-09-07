@@ -1,0 +1,33 @@
+[submodule "esp-idf"]
+	path = esp-idf
+	url = git@github.com:espressif/esp-idf.git
+[submodule "components/arduino-esp32"]
+	path = components/arduino-esp32
+	url = git@github.com:CommanderRedYT/arduino-esp32.git
+[submodule "components/fmt"]
+	path = components/fmt
+	url = git@github.com:CommanderRedYT/fmt.git
+[submodule "components/ArduinoJson"]
+	path = components/ArduinoJson
+	url = git@github.com:CommanderRedYT/ArduinoJson.git
+[submodule "components/expected"]
+	path = components/expected
+	url = git@github.com:CommanderRedYT/expected.git
+[submodule "components/esp-nimble-cpp"]
+	path = components/esp-nimble-cpp
+	url = git@github.com:CommanderRedYT/esp-nimble-cpp.git
+[submodule "components/espchrono"]
+	path = components/espchrono
+	url = git@github.com:CommanderRedYT/espchrono.git
+[submodule "cpputils"]
+	path = cpputils
+	url = git@github.com:CommanderRedYT/cpputils.git
+[submodule "date"]
+	path = date
+	url = git@github.com:CommanderRedYT/date.git
+[submodule "components/cpputils"]
+	path = components/cpputils
+	url = git@github.com:CommanderRedYT/cpputils.git
+[submodule "components/date"]
+	path = components/date
+	url = git@github.com:CommanderRedYT/date.git

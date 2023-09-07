@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/ArduinoJson" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/arduino-esp32" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/esp-nimble-cpp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/expected" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/fmt" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/bootloader/subproject/components/micro-ecc/micro-ecc" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/bt/controller/lib_esp32" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/bt/controller/lib_esp32c2/esp32c2-bt-lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/bt/controller/lib_esp32c3_family" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/bt/controller/lib_esp32c6/esp32c6-bt-lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/bt/controller/lib_esp32h2/esp32h2-bt-lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/bt/host/nimble/nimble" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/cmock/CMock" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/esp_coex/lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/esp_phy/lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/esp_wifi/lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/heap/tlsf" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/ieee802154/lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/json/cJSON" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/lwip/lwip" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/mbedtls/mbedtls" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/mqtt/esp-mqtt" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/openthread/lib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/openthread/openthread" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/protobuf-c/protobuf-c" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/spiffs/spiffs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/esp-idf/components/unity/unity" vcs="Git" />
+  </component>
+</project>
