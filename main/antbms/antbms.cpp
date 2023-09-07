@@ -37,7 +37,9 @@ constexpr static const uint8_t ANT_COMMAND_WRITE_REGISTER = 0x51;
 
 bool AntBms::send_(uint8_t function, uint16_t address, uint8_t value, bool authenticate)
 {
-    if (authenticate) {
+    ESP_LOGI(TAG, "Executing send");
+    if (authenticate)
+    {
         this->authenticate_();
     }
 
@@ -55,15 +57,30 @@ bool AntBms::send_(uint8_t function, uint16_t address, uint8_t value, bool authe
     frame[9] = 0x55;      // footer
 
     ESP_LOGV(TAG, "Send command: %s", format_hex_pretty(frame, sizeof(frame)).c_str());
-    /*
-    auto status = esp_ble_gattc_write_char(this->parent_->get_gattc_if(), this->parent_->get_conn_id(),
-                                           this->characteristic_handle_, sizeof(frame), frame, ESP_GATT_WRITE_TYPE_NO_RSP,
-                                           ESP_GATT_AUTH_REQ_NONE);
 
-    if (status)
-        ESP_LOGW(TAG, "[%s] esp_ble_gattc_write_char failed, status=%d", this->parent_->address_str().c_str(), status);
-
-    return (status == 0);*/
+    if (m_ble_characteristic)
+    {
+        if (m_ble_characteristic->canWrite())
+        {
+            if (m_ble_characteristic->writeValue(frame, sizeof(frame), false))
+            {
+                ESP_LOGI(TAG, "Write successful");
+                return true;
+            }
+            else
+            {
+                ESP_LOGW(TAG, "Write failed");
+            }
+        }
+        else
+        {
+            ESP_LOGW(TAG, "Characteristic cannot be written");
+        }
+    }
+    else
+    {
+        ESP_LOGW(TAG, "Characteristic not found");
+    }
 
     return false;
 }
@@ -99,15 +116,30 @@ bool AntBms::authenticate_()
     frame[21] = 0x55;
 
     ESP_LOGV(TAG, "Send command: %s", format_hex_pretty(frame, sizeof(frame)).c_str());
-    /*
-    auto status = esp_ble_gattc_write_char(this->parent_->get_gattc_if(), this->parent_->get_conn_id(),
-                                           this->characteristic_handle_, sizeof(frame), frame, ESP_GATT_WRITE_TYPE_NO_RSP,
-                                           ESP_GATT_AUTH_REQ_NONE);
 
-    if (status)
-        ESP_LOGW(TAG, "[%s] esp_ble_gattc_write_char failed, status=%d", this->parent_->address_str().c_str(), status);
-
-    return (status == 0);*/
+    if (m_ble_characteristic)
+    {
+        if (m_ble_characteristic->canWrite())
+        {
+            if (m_ble_characteristic->writeValue(frame, sizeof(frame), false))
+            {
+                ESP_LOGI(TAG, "Write successful");
+                return true;
+            }
+            else
+            {
+                ESP_LOGW(TAG, "Write failed");
+            }
+        }
+        else
+        {
+            ESP_LOGW(TAG, "Characteristic cannot be written");
+        }
+    }
+    else
+    {
+        ESP_LOGW(TAG, "Characteristic not found");
+    }
 
     return false;
 }
@@ -116,7 +148,8 @@ bool AntBms::authenticate_variable_(const uint8_t *data, uint8_t data_length)
 {
     std::vector<uint8_t> frame = {0x7E, 0xA1, 0x23, 0x6A, 0x01};
     frame.push_back(data_length);
-    for (int i = 0; i < data_length; i++) {
+    for (int i = 0; i < data_length; i++)
+    {
         frame.push_back(data[i]);
     }
     auto crc = helpers::crc16(frame.data() + 1, frame.size());
@@ -126,22 +159,39 @@ bool AntBms::authenticate_variable_(const uint8_t *data, uint8_t data_length)
     frame.push_back(0x55);
 
     ESP_LOGV(TAG, "Send command: %s", format_hex_pretty(&frame.front(), frame.size()).c_str());
-    /*
-    auto status = esp_ble_gattc_write_char(this->parent_->get_gattc_if(), this->parent_->get_conn_id(),
-                                           this->characteristic_handle_, frame.size(), &frame.front(),
-                                           ESP_GATT_WRITE_TYPE_NO_RSP, ESP_GATT_AUTH_REQ_NONE);
 
-    if (status)
-        ESP_LOGW(TAG, "[%s] esp_ble_gattc_write_char failed, status=%d", this->parent_->address_str().c_str(), status);
+    if (m_ble_characteristic)
+    {
+        if (m_ble_characteristic->canWrite())
+        {
+            if (m_ble_characteristic->writeValue(frame.data(), frame.size(), false))
+            {
+                ESP_LOGI(TAG, "Write successful");
+                return true;
+            }
+            else
+            {
+                ESP_LOGW(TAG, "Write failed");
+            }
+        }
+        else
+        {
+            ESP_LOGW(TAG, "Characteristic cannot be written");
+        }
+    }
+    else
+    {
+        ESP_LOGW(TAG, "Characteristic not found");
+    }
 
-    return (status == 0);*/
 
     return false;
 }
 
 void AntBms::on_ant_bms_ble_data_(const uint8_t &function, const std::vector<uint8_t> &data)
 {
-    switch (function) {
+    switch (function)
+    {
     case ANT_FRAME_TYPE_STATUS:
         this->on_status_data_(data);
         break;
@@ -164,7 +214,8 @@ void AntBms::on_status_data_(const std::vector<uint8_t> &data)
 
     ESP_LOGI(TAG, "Status frame (%d bytes):", data.size());
 
-    if (data.size() != (6 + data[5] + 4)) {
+    if (data.size() != (6 + data[5] + 4))
+    {
         ESP_LOGW(TAG, "Skipping status frame because of invalid length");
         return;
     }
@@ -189,9 +240,9 @@ void AntBms::on_status_data_(const std::vector<uint8_t> &data)
     uint8_t temperature_sensors = data[8];
     ESP_LOGI(TAG, "  Number of temperature sensors: %d", temperature_sensors);
 
-    /*
     //   9   1  0x0E        Number of cells (14)                max 32
     uint8_t cells = data[9];
+    /*
     this->publish_state_(this->battery_strings_sensor_, cells * 1.0f);
 
     //  10   8  0x02 0x00 0x00 0x00 0x00 0x00 0x00 0x00   Protection bitmask
@@ -215,9 +266,9 @@ void AntBms::on_status_data_(const std::vector<uint8_t> &data)
     for (uint8_t i = 0; i < cells; i++) {
         this->publish_state_(this->cells_[i].cell_voltage_sensor_, ant_get_16bit(i * 2 + 34) * 0.001f);
     }
-
+*/
     uint8_t offset = cells * 2;
-
+/*
     //  62   2  0x1C 0x00   Temperature sensor 1        int16_t
     //  64   2  0x1C 0x00   Temperature sensor 2        int16_t
     //  66   2  0xD8 0xFF   Temperature sensor 3        int16_t
@@ -228,9 +279,9 @@ void AntBms::on_status_data_(const std::vector<uint8_t> &data)
         this->publish_state_(this->temperatures_[i].temperature_sensor_,
                              ((int16_t) ant_get_16bit(i * 2 + 34 + offset)) * 1.0f);
     }
-
+*/
     offset = offset + (temperature_sensors * 2);
-
+/*
     //  70   2  0x1C 0x00   Mosfet temperature          int16_t
     this->publish_state_(this->temperatures_[temperature_sensors].temperature_sensor_,
                          ((int16_t) ant_get_16bit(34 + offset)) * 1.0f);
@@ -291,10 +342,13 @@ void AntBms::on_status_data_(const std::vector<uint8_t> &data)
 
     //  94   4  0x08 0x53 0x00 0x00    Total battery cycles capacity     uint32_t
     this->publish_state_(this->battery_cycle_capacity_sensor_, ant_get_32bit(58 + offset) * 0.001f);
+ */
 
     //  98   4  0x00 0x00 0x00 0x00    Power
-    this->publish_state_(this->power_sensor_, ((int32_t) ant_get_32bit(62 + offset)) * 1.0f);
+    //this->publish_state_(this->power_sensor_, ((int32_t) ant_get_32bit(62 + offset)) * 1.0f);
+    m_bmsData.power = ((int32_t) ant_get_32bit(62 + offset)) * 1.0f;
 
+    /*
     // 102   4  0x6B 0x28 0x12 0x00    Total runtime
     this->publish_state_(this->total_runtime_sensor_, (float) ant_get_32bit(66 + offset));
 
@@ -379,26 +433,30 @@ void AntBms::on_device_info_data_(const std::vector<uint8_t> &data)
 
 void AntBms::assemble(const uint8_t *data, uint8_t data_length)
 {
-    if (m_frame_buffer.size() > MAX_RESPONSE_SIZE) {
+    if (m_frame_buffer.size() > MAX_RESPONSE_SIZE)
+    {
         ESP_LOGW(TAG, "Maximum response size (%d bytes) exceeded", m_frame_buffer.size());
         m_frame_buffer.clear();
     }
 
     // Flush buffer on every preamble
-    if (data[0] == ANT_PKT_START_1 && data[1] == ANT_PKT_START_2) {
+    if (data[0] == ANT_PKT_START_1 && data[1] == ANT_PKT_START_2)
+    {
         m_frame_buffer.clear();
     }
 
     m_frame_buffer.insert(m_frame_buffer.end(), data, data + data_length);
 
-    if (m_frame_buffer.back() == ANT_PKT_END_2) {
+    if (m_frame_buffer.back() == ANT_PKT_END_2)
+    {
         const uint8_t *raw = &m_frame_buffer[0];
 
         uint8_t function = raw[2];
         uint16_t data_len = raw[5];
         uint16_t frame_len = 6 + data_len + 4;
         // It looks like the data_len value of the device info frame is wrong
-        if (frame_len != m_frame_buffer.size() && function != ANT_FRAME_TYPE_DEVICE_INFO) {
+        if (frame_len != m_frame_buffer.size() && function != ANT_FRAME_TYPE_DEVICE_INFO)
+        {
             ESP_LOGW(TAG, "Invalid frame length");
             m_frame_buffer.clear();
             return;
@@ -406,7 +464,8 @@ void AntBms::assemble(const uint8_t *data, uint8_t data_length)
 
         uint16_t computed_crc = helpers::crc16(raw + 1, frame_len - 5);
         uint16_t remote_crc = uint16_t(raw[frame_len - 3]) << 8 | (uint16_t(raw[frame_len - 4]) << 0);
-        if (computed_crc != remote_crc) {
+        if (computed_crc != remote_crc)
+        {
             ESP_LOGW(TAG, "CRC Check failed! %04X != %04X", computed_crc, remote_crc);
             m_frame_buffer.clear();
             return;
@@ -444,33 +503,154 @@ void AntBms::update()
 
         m_ble_scan = NimBLEDevice::getScan();
 
-        m_ble_scan->setScanCallbacks(&m_on_scan_results);
+        m_ble_scan->setScanCallbacks(&m_on_scan_results, false);
 
         m_ble_scan->setInterval(100);
-        m_ble_scan->setWindow(50);
+        m_ble_scan->setWindow(99);
 
         m_ble_scan->setActiveScan(true);
-        m_ble_scan->start(1000, false);
+        m_ble_scan->start(0, false);
 
         m_ble_state = BleState::BLE_SCANNING;
         break;
-    case BleState::BLE_CONNECTED:
+    case BleState::BLE_SCANNING:
     {
-        if (m_device_state != DEVICE_AUTHENTICATED)
+        if (m_ble_devices.empty())
         {
-            ESP_LOGW(TAG, "Not authenticated, not updating");
             return;
         }
 
-        if (espchrono::ago(m_last_update) > m_interval)
-            send_(ANT_COMMAND_STATUS, 0x0000, 0xbe, false);
+        auto &first_element = m_ble_devices[0];
+
+        ble_connect(first_element->getAddress());
         break;
     }
-    default:
-        return;
+    case BleState::BLE_CONNECTING:
+        m_ble_state = BleState::BLE_SCANNING;
+        break;
+    case BleState::BLE_CONNECTED:
+        if (espchrono::ago(m_last_update) > m_interval)
+        {
+            m_last_update = espchrono::millis_clock::now();
+            send_(ANT_COMMAND_STATUS, 0x0000, 0xbe, false);
+            ESP_LOGI(TAG, "%s", m_bmsData.toString().c_str());
+        }
+        break;
+    default:;
     }
 }
 
-AntBms::AntBms() : m_on_scan_results{*this} {}
+AntBms::AntBms() : m_on_scan_results{*this}, m_on_client_events{*this}, m_characteristics_callbacks{*this}
+{}
 
+void AntBms::ble_connect(NimBLEAddress address)
+{
+    m_ble_state = BleState::BLE_CONNECTING;
+
+    if (m_ble_client)
+    {
+        m_ble_client->disconnect();
+
+        m_ble_client = nullptr;
+    }
+
+    m_ble_client = NimBLEDevice::createClient();
+
+    m_ble_client->setClientCallbacks(&m_on_client_events, false);
+
+    if (m_ble_client->connect(address))
+    {
+        m_ble_state = BLE_CONNECTED;
+
+        ESP_LOGI(TAG, "Successfuly connected to %s", address.toString().c_str());
+
+        // add notify callback to ANT_BMS_CHARACTERISTIC_UUID
+        if (auto *service = m_ble_client->getService(ANT_BMS_SERVICE_UUID); service)
+        {
+            if (auto *characteristic = service->getCharacteristic(ANT_BMS_CHARACTERISTIC_UUID); characteristic)
+            {
+                if (characteristic->canNotify())
+                {
+                    if (characteristic->subscribe(true, [&](NimBLERemoteCharacteristic *pBLERemoteCharacteristic,
+                                                            uint8_t *pData, size_t length, bool isNotify) {
+                        m_notifyCallback(pBLERemoteCharacteristic, pData, length, isNotify);
+                    }))
+                    {
+                        ESP_LOGI(TAG, "Subscribed to %s", characteristic->toString().c_str());
+                        m_ble_characteristic = characteristic;
+                    }
+                    else
+                    {
+                        ESP_LOGW(TAG, "Failed to subscribe to %s", characteristic->toString().c_str());
+                    }
+                }
+                else
+                {
+                    ESP_LOGW(TAG, "Characteristic %s does not support notify", characteristic->toString().c_str());
+                }
+            }
+            else
+            {
+                ESP_LOGI(TAG, "Failed to get characteristic %s",
+                         NimBLEUUID{ANT_BMS_CHARACTERISTIC_UUID}.toString().c_str());
+            }
+        }
+        else
+        {
+            ESP_LOGI(TAG, "Failed to get service %s",
+                     NimBLEUUID{ANT_BMS_SERVICE_UUID}.toString().c_str());
+        }
+    }
+    else
+    {
+        ESP_LOGW(TAG, "Error connecting to %s", address.toString().c_str());
+    }
+}
+
+void AntBms::m_notifyCallback(NimBLERemoteCharacteristic *pBLERemoteCharacteristic, uint8_t *pData, size_t length,
+                              bool isNotify)
+{
+    ESP_LOGI(TAG, "Received %s: %s (%.*s)", isNotify ? "notification" : "indication", format_hex_pretty(pData, length).c_str(), length, pData);
+
+    this->assemble(pData, length);
+}
+
+void AntBms::OnScanResults::onDiscovered(NimBLEAdvertisedDevice *advertised_device)
+{
+    // check if ANT_BMS_SERVICE_UUID
+    if (!advertised_device->haveServiceUUID())
+    {
+        ESP_LOGW(TAG, "[onDiscovered] Found BLE device without service UUIDs: %s",
+                 advertised_device->toString().c_str());
+        return;
+    }
+
+    if (!advertised_device->isAdvertisingService(ANT_BMS_SERVICE_UUID))
+    {
+        ESP_LOGW(TAG, "[onDiscovered] Found BLE device without MATCHING service UUID: %s",
+                 advertised_device->toString().c_str());
+        return;
+    }
+
+    m_ant_bms.m_ble_devices.push_back(advertised_device);
+}
+
+void AntBms::OnClientCallback::onDisconnect(NimBLEClient *pClient, int reason)
+{
+    m_ant_bms.m_ble_state = BLE_SCANNING;
+}
+
+void AntBms::CharacteristicCallbacks::onSubscribe(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo,
+                                                  uint16_t subValue)
+{
+    // send device info request
+    ESP_LOGI(TAG, "Request device info frame");
+    // 0x7e 0xa1 0x02 0x6c 0x02 0x20 0x58 0xc4 0xaa 0x55
+    m_ant_bms.send_(ANT_COMMAND_DEVICE_INFO, 0x026c, 0x20, false);
+}
+
+std::string AntBmsData::toString()
+{
+    return fmt::format("Power: {}W", power);
+}
 } // namespace antbms

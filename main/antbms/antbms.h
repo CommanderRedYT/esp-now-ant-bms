@@ -1,5 +1,5 @@
 #pragma once
-constexpr const char * const TAG = "AntBms";
+constexpr const char *const TAG = "AntBms";
 
 // system includes
 #include <vector>
@@ -14,10 +14,17 @@ using namespace std::chrono_literals;
 
 namespace antbms {
 
+struct AntBmsData
+{
+    float power;
+    std::string toString();
+};
+
 class AntBms
 {
 public:
     AntBms();
+
     // interaction with class
     void update();
 
@@ -64,7 +71,11 @@ private:
 
     NimBLERemoteCharacteristic *m_ant_bms_remote_characteristic = nullptr;
     NimBLEScan *m_ble_scan = nullptr;
+    NimBLEClient *m_ble_client = nullptr;
+    NimBLERemoteCharacteristic *m_ble_characteristic = nullptr;
     std::vector<NimBLEAdvertisedDevice *> m_ble_devices;
+
+    void ble_connect(NimBLEAddress address);
 
     enum DeviceState
     {
@@ -77,6 +88,7 @@ private:
     {
         BLE_IDLE,
         BLE_SCANNING,
+        BLE_CONNECTING,
         BLE_CONNECTED,
     } m_ble_state = BLE_IDLE;
 
@@ -85,27 +97,45 @@ private:
     {
     public:
         explicit OnScanResults(AntBms &ant_bms)
-            : m_ant_bms(ant_bms)
+                : m_ant_bms{ant_bms}
         {}
 
-        void onDiscovered(NimBLEAdvertisedDevice *advertised_device) override
-        {
-            ESP_LOGE(TAG, "[onDiscovered] Found BLE device: %s", advertised_device->toString().c_str());
-        }
-
-        void onScanEnd(NimBLEScanResults scanResults) override
-        {
-            ESP_LOGW(TAG, "Scan ended");
-
-            for (auto &advertised_device : scanResults)
-            {
-                ESP_LOGW(TAG, "[onScanEnd] Found BLE device: %s", advertised_device->toString().c_str());
-            }
-        }
+        void onDiscovered(NimBLEAdvertisedDevice *advertised_device) override;
 
     private:
         AntBms &m_ant_bms;
     } m_on_scan_results;
+
+    class OnClientCallback : public NimBLEClientCallbacks
+    {
+    public:
+        explicit OnClientCallback(AntBms &ant_bms)
+                : m_ant_bms{ant_bms}
+        {}
+
+        void onDisconnect(NimBLEClient *pClient, int reason) override;
+
+    private:
+        AntBms &m_ant_bms;
+    } m_on_client_events;
+
+    class CharacteristicCallbacks : public NimBLECharacteristicCallbacks
+    {
+    public:
+        explicit CharacteristicCallbacks(AntBms &ant_bms)
+                : m_ant_bms{ant_bms}
+        {}
+
+        void onSubscribe(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo, uint16_t subValue) override;
+
+    private:
+        AntBms &m_ant_bms;
+    } m_characteristics_callbacks;
+
+    void m_notifyCallback(NimBLERemoteCharacteristic *pBLERemoteCharacteristic,
+                        uint8_t *pData, size_t length, bool isNotify);
+
+    AntBmsData m_bmsData;
 };
 
 } // namespace antbms

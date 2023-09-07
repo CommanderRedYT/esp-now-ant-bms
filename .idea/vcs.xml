@@ -4,8 +4,12 @@
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/components/ArduinoJson" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/components/arduino-esp32" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/cpputils" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/date" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/components/esp-nimble-cpp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/espchrono" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/components/expected" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/components/expected/cmake/tl-cmake" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/components/fmt" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/esp-idf" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/esp-idf/components/bootloader/subproject/components/micro-ecc/micro-ecc" vcs="Git" />
