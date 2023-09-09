@@ -2,6 +2,7 @@
 
 // local includes
 #include "antbms/antbms.h"
+#include "espnow.h"
 
 extern "C" void app_main()
 {
@@ -9,9 +10,15 @@ extern "C" void app_main()
 
     antbms::AntBms antbms;
 
+    espnow::wifi_init();
+
+    espnow::init();
+
     while (true)
     {
         antbms.update();
+
+        espnow::handle();
 
         vPortYield();
 

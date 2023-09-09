@@ -10,15 +10,12 @@ constexpr const char *const TAG = "AntBms";
 #include <espchrono.h>
 #include <NimBLEDevice.h>
 
+// local includes
+#include "datastructure.h"
+
 using namespace std::chrono_literals;
 
 namespace antbms {
-
-struct AntBmsData
-{
-    float power;
-    std::string toString();
-};
 
 class AntBms
 {
@@ -66,8 +63,10 @@ public:
 private:
     std::string m_password;
     std::vector<uint8_t> m_frame_buffer;
-    espchrono::millis_clock::duration m_interval = 1s;
+    espchrono::millis_clock::duration m_interval = 500ms;
+    espchrono::millis_clock::duration m_wireless_interval = 100ms;
     espchrono::millis_clock::time_point m_last_update = espchrono::millis_clock::now();
+    espchrono::millis_clock::time_point m_last_wireless_update = espchrono::millis_clock::now();
 
     NimBLERemoteCharacteristic *m_ant_bms_remote_characteristic = nullptr;
     NimBLEScan *m_ble_scan = nullptr;
@@ -76,13 +75,6 @@ private:
     std::vector<NimBLEAdvertisedDevice *> m_ble_devices;
 
     void ble_connect(NimBLEAddress address);
-
-    enum DeviceState
-    {
-        DEVICE_DISCONNECTED,
-        DEVICE_CONNECTED,
-        DEVICE_AUTHENTICATED,
-    } m_device_state = DEVICE_DISCONNECTED;
 
     enum BleState
     {
